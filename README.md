@@ -25,7 +25,7 @@ npm run build
 To run a VSCode instance with your extenstion, press the `F5` button.
 
 ## Run part 3
-To compile a given sourcefile and save a wasm file, execute the following command in the terminal:
+To compile a given sourcefile and save a wasm file, execute the following command in the terminal:  
 **Mac/Linux**
 ```
 ./packages/cli/bin/cli.js generate <input file> <destination>
@@ -36,7 +36,7 @@ To compile a given sourcefile and save a wasm file, execute the following comman
 ```
 
 Before you can run the following command, you will have to define it [here](packages/cli/src/main.ts). Instructions on how to do this will follow with the task description for part-3.
-To compile a given sourcefile and run it, execute the following command in the terminal:
+To compile a given sourcefile and run it, execute the following command in the terminal:  
 **Mac/Linux**
 ```
 ./packages/cli/bin/cli.js run <input file>
