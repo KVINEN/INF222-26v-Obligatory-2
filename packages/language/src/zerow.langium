@@ -1,7 +1,15 @@
 grammar Zerow
 
 entry Program:
-    TODO = 'Declare' 'your' 'grammar';
+    (unit+=Unit 
+    | declare+=Declare
+    )*;
+
+Unit:
+    'unit' name=ID;
+
+Declare:
+    'declare' name=ID 'equals' value=INT '['unit=[Unit]']';
 
 hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][\w_]*/;
