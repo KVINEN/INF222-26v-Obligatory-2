@@ -3,6 +3,7 @@ grammar Zerow
 entry Program:
     (unit+=Unit 
     | declare+=Declare
+    | asign+=Asign
     )*;
 
 Unit:
@@ -10,6 +11,9 @@ Unit:
 
 Declare:
     'declare' name=ID 'equals' value=INT '['unit=[Unit]']';
+
+Asign:
+    'asign' value=INT '['unit=[Unit]']' 'to' + declare=[Declare];
 
 hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][\w_]*/;
