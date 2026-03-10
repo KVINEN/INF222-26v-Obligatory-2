@@ -15,10 +15,10 @@ Declare:
     'declare' name=ID 'equals' value=INT '['unit=[Unit]']';
 
 Assign:
-    'assign' value=INT '['unit=[Unit]']' 'to' + declare=[Declare];
+    'assign' value=INT '['unit=[Unit:ID]']' 'to' declare=[Declare:ID];
 
 Returns:
-    'returns' (declare=[Declare])? (value=INT '['unit=[Unit]']')?;
+    'returns' (declare=[Declare:ID])? (value=INT '['unit=[Unit:ID]']')?;
 
 
 hidden terminal WS: /\s+/;
