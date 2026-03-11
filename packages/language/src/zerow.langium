@@ -3,12 +3,11 @@ grammar Zerow
 entry Program:
     (units+=Unit
     |statements+=Statement
-    |returns+=Return
     |addtions+=Addition
-    |subtractions+=Subtraction
     |multiplications+=Multiplication
     |divissions+=Divission
-    |negatives+=NegativeNum)*;
+    |negatives+=NegativeNum
+    |returns+=Return)*;
 
 Statement:
     Declare | Assign;
@@ -26,13 +25,10 @@ Return:
     'returns' value=Expression;
 
 Expression:
-    Declare | IntLiteral | VariableRef | Addition | Subtraction | Multiplication | Divission | NegativeNum;
+    Addition;
 
 Addition infers Expression:
-    Multiplication ({infer BinaryExpression.left=current} operator=('add') right=Multiplication)*;
-
-Subtraction infers Expression:
-    Multiplication ({infer BinaryExpression.left=current} operator=('sub') right=Multiplication)*;
+    Multiplication ({infer BinaryExpression.left=current} operator=('add' | 'sub') right=Multiplication)*;
 
 Multiplication infers Expression:
     Primary ({infer BinaryExpression.left=current} operator=('mul') right=Primary)*;
