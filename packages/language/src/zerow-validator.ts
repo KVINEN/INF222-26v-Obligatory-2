@@ -9,7 +9,7 @@ export function registerValidationChecks(services: ZerowServices) {
     const registry = services.validation.ValidationRegistry;
     const validator = services.validation.ZerowValidator;
     const checks: ValidationChecks<ZerowAstType> = {
-        Program: validator.checkUniqueDeclarationName
+        Program: validator.validateDeclarationStmt
     };
     registry.register(checks, validator);
 }
@@ -24,8 +24,17 @@ export class ZerowValidator {
         // this.validateProgram(model, accept);
     }
 
+    // validateProgram(model: Program, accept: ValidationAcceptor) {
+    //     function buildMeasureSet(/* TODO: add type */) {
+    //         /* TODO: Add validation code */
+    //     }
+
+    //     function validateStatement(/* TODO: add type */) {
+    //         /* TODO: Add validation code */
+    //     }
+
     //check that no two declarations have the same name
-    checkUniqueDeclarationName(model: Program, accept: ValidationAcceptor): void {
+    validateDeclarationStmt(model: Program, accept: ValidationAcceptor): void {
         const names = new Set<string>();
         for (const statement of model.statements) {
             if (statement.$type === 'Declare') {
@@ -40,20 +49,6 @@ export class ZerowValidator {
             }
         }
     }
-
-
-    // validateProgram(model: Program, accept: ValidationAcceptor) {
-    //     function buildMeasureSet(/* TODO: add type */) {
-    //         /* TODO: Add validation code */
-    //     }
-
-    //     function validateStatement(/* TODO: add type */) {
-    //         /* TODO: Add validation code */
-    //     }
-
-    //     function validateDeclarationStmt(/* TODO: add type */) {
-    //         /* TODO: Add validation code */
-    //     }
 
     //     function validateAssignmentStmt(/* TODO: add type */) {
     //         /* TODO: Add validation code */
