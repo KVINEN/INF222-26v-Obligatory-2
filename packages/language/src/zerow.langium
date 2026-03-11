@@ -1,24 +1,33 @@
 grammar Zerow
 
 entry Program:
-    (
-    unit+=Unit 
-    | declare+=Declare
-    | assign+=Assign
-    | returns+=Returns
-    )*;
+    (units+=Unit)*
+    (statements+=Statement)*
+    (returns+=Return)*;
+
+Statement:
+    Declare | Assign | Return;
 
 Unit:
     'unit' name=ID;
 
 Declare:
-    'declare' name=ID 'equals' value=INT '['unit=[Unit]']';
+    'declare' name=ID 'equals' value=Expression;
 
 Assign:
-    'assign' value=INT '['unit=[Unit:ID]']' 'to' declare=[Declare:ID];
+    'assign' value=Expression 'to' declare=[Declare:ID];
 
-Returns:
-    'returns' (declare=[Declare:ID])? (value=INT '['unit=[Unit:ID]']')?;
+Return:
+    'returns' value=Expression;
+
+Expression:
+    Declare | IntLiteral | VariableRef;
+
+IntLiteral:
+    value=INT '[' unit=[Unit:ID] ']';
+
+VariableRef:
+    var=[Declare:ID];
 
 
 hidden terminal WS: /\s+/;
