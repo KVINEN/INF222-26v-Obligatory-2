@@ -6,7 +6,7 @@ entry Program:
     (returns+=Return)*;
 
 Statement:
-    Declare | Assign | Return;
+    Declare | Assign;
 
 Unit:
     'unit' name=ID;
@@ -21,7 +21,25 @@ Return:
     'returns' value=Expression;
 
 Expression:
-    Declare | IntLiteral | VariableRef;
+    Declare | IntLiteral | VariableRef | Addition | Subtraction | Multiplication | Divission;
+
+Addition infers Expression:
+    Multiplication ({infer BinaryExpression.left=current} operator=('add') right=Multiplication)*;
+
+Subtraction infers Expression:
+    Multiplication ({infer BinaryExpression.left=current} operator=('sub') right=Multiplication)*;
+
+Multiplication infers Expression:
+    Primary ({infer BinaryExpression.left=current} operator=('mul') right=Primary)*;
+
+Divission infers Expression:
+    Primary ({infer BinaryExpression.left=current} operator=('div') right=Primary)*;
+
+Primary infers Expression:
+    GroupExpression | IntLiteral | VariableRef;
+
+GroupExpression:
+    '(' expr=Expression ')';
 
 IntLiteral:
     value=INT '[' unit=[Unit:ID] ']';
