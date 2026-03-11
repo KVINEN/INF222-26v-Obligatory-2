@@ -1,9 +1,14 @@
 grammar Zerow
 
 entry Program:
-    (units+=Unit)*
-    (statements+=Statement)*
-    (returns+=Return)*;
+    (units+=Unit
+    |statements+=Statement
+    |returns+=Return
+    |addtions+=Addition
+    |subtractions+=Subtraction
+    |multiplications+=Multiplication
+    |divissions+=Divission
+    |negatives+=NegativeNum)*;
 
 Statement:
     Declare | Assign;
@@ -21,7 +26,7 @@ Return:
     'returns' value=Expression;
 
 Expression:
-    Declare | IntLiteral | VariableRef | Addition | Subtraction | Multiplication | Divission;
+    Declare | IntLiteral | VariableRef | Addition | Subtraction | Multiplication | Divission | NegativeNum;
 
 Addition infers Expression:
     Multiplication ({infer BinaryExpression.left=current} operator=('add') right=Multiplication)*;
@@ -36,7 +41,7 @@ Divission infers Expression:
     Primary ({infer BinaryExpression.left=current} operator=('div') right=Primary)*;
 
 Primary infers Expression:
-    GroupExpression | IntLiteral | VariableRef;
+    GroupExpression | IntLiteral | VariableRef | NegativeNum;
 
 GroupExpression:
     '(' expr=Expression ')';
@@ -46,6 +51,9 @@ IntLiteral:
 
 VariableRef:
     var=[Declare:ID];
+
+NegativeNum:
+    'neg' value=Primary;
 
 
 hidden terminal WS: /\s+/;
