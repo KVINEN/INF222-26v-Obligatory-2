@@ -9,8 +9,7 @@ export function registerValidationChecks(services: ZerowServices) {
     const registry = services.validation.ValidationRegistry;
     const validator = services.validation.ZerowValidator;
     const checks: ValidationChecks<ZerowAstType> = {
-        // TODO: Declare validators for your properties
-        Program: validator.checkProgram
+        Program: validator.checkUniqueDeclarationName
     };
     registry.register(checks, validator);
 }
@@ -23,6 +22,23 @@ export class ZerowValidator {
     // TODO: Add logic here for validation checks of properties
     checkProgram(model: Program, accept: ValidationAcceptor): void {
         // this.validateProgram(model, accept);
+    }
+
+    //check that no two declarations have the same name
+    checkUniqueDeclarationName(model: Program, accept: ValidationAcceptor): void {
+        const names = new Set<string>();
+        for (const statement of model.statements) {
+            if (statement.$type === 'Declare') {
+                const name = statement.name;
+                if (names.has(name)) {
+                    accept('error', `${name} has already been declared`, {
+                        node: statement,
+                        property: 'name'
+                    });
+                }
+                names.add(name);
+            }
+        }
     }
 
 
