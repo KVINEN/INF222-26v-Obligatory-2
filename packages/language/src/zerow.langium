@@ -1,16 +1,15 @@
 grammar Zerow
 
 entry Program:
-    (units+=Unit
-    |statements+=Statement
-    |addtions+=Addition
-    |multiplications+=Multiplication
-    |divissions+=Divission
-    |negatives+=NegativeNum
-    |returns+=Return)*;
+    (units+=Unit)*
+    (statements+=Statement)*
+    (returns+=Return)*;
 
 Statement:
-    Declare | Assign;
+    Declare | Assign | ExpressionStatment;
+
+ExpressionStatment:
+    expr=Expression;
 
 Unit:
     'unit' name=ID;
@@ -19,7 +18,7 @@ Declare:
     'declare' name=ID 'equals' value=Expression;
 
 Assign:
-    'assign' value=Expression 'to' declare=[Declare:ID];
+    'assign' value=Expression 'to' target=[Declare:ID];
 
 Return:
     'returns' value=Expression;
@@ -31,10 +30,10 @@ Addition infers Expression:
     Multiplication ({infer BinaryExpression.left=current} operator=('add' | 'sub') right=Multiplication)*;
 
 Multiplication infers Expression:
-    Primary ({infer BinaryExpression.left=current} operator=('mul') right=Primary)*;
+    Primary ({infer BinaryExpression.left=current} operator=('mul' | 'div') right=Primary)*;
 
-Divission infers Expression:
-    Primary ({infer BinaryExpression.left=current} operator=('div') right=Primary)*;
+//Divission infers Expression:
+//    Primary ({infer BinaryExpression.left=current} operator=('div') right=Primary)*;
 
 Primary infers Expression:
     GroupExpression | IntLiteral | VariableRef | NegativeNum;
