@@ -1,5 +1,5 @@
 import type { ValidationAcceptor, ValidationChecks } from 'langium';
-import type { Program, ZerowAstType } from './generated/ast.js';
+import { Declare, Program, Statement, ZerowAstType } from './generated/ast.js';
 import type { ZerowServices } from './zerow-module.js';
 
 /**
@@ -9,7 +9,7 @@ export function registerValidationChecks(services: ZerowServices) {
     const registry = services.validation.ValidationRegistry;
     const validator = services.validation.ZerowValidator;
     const checks: ValidationChecks<ZerowAstType> = {
-        Program: validator.checkProgram
+        Program: validator.checkProgram,
     };
     registry.register(checks, validator);
 }
@@ -25,28 +25,30 @@ export class ZerowValidator {
     }
 
     validateProgram(model: Program, accept: ValidationAcceptor) {
+
+        const declaredName = new Set<string>();
+        for (const statement of model.statements) {
+            validateStatement(statement);
+        }
         //     function buildMeasureSet(/* TODO: add type */) {
         //         /* TODO: Add validation code */
         //     }
 
-        //     function validateStatement(/* TODO: add type */) {
-        //         /* TODO: Add validation code */
-        //     }
+        function validateStatement(statement: Statement) {
+            if (statement.$type === 'Declare') {
+                validateDeclarationStmt(statement);
+            }
+        }
 
         //check that no two declarations have the same name
-        function validateDeclarationStmt(model: Program, accept: ValidationAcceptor) {
-            const names = new Set<string>();
-            for (const statement of model.statements) {
-                if (statement.$type === 'Declare') {
-                    const name = statement.name;
-                    if (names.has(name)) {
-                        accept('error', `${name} has already been declared`, {
-                            node: statement,
-                            property: 'name'
-                        });
-                    }
-                    names.add(name);
-                }
+        function validateDeclarationStmt(declareation: Declare) {
+            if (declaredName.has(declareation.name)) {
+                accept('error', `Variable ${declareation.name} has already been declared`, {
+                    node: declareation,
+                    property: 'name'
+                });
+            } else {
+                declaredName.add(declareation.name);
             }
         }
 
@@ -54,9 +56,9 @@ export class ZerowValidator {
         //         /* TODO: Add validation code */
         //     }
 
-        //     function validateExpression(/* TODO: add type */) {
-        //         /* TODO: Add validation code */
-        //     }
+        //function validateExpression(expr: Expression) {
+
+        //}
 
         //     function validateLiteral(/* TODO: add type */) {
         //         /* TODO: Add validation code */
@@ -69,7 +71,6 @@ export class ZerowValidator {
         //     function resolveReference(/* TODO: add type */) {
         //         /* TODO: Add validation code */
         //     }
-        
-        validateDeclarationStmt(model, accept);
+
     }
 }
