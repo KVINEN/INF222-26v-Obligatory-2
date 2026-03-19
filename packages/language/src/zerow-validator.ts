@@ -1,5 +1,5 @@
 import type { ValidationAcceptor, ValidationChecks } from 'langium';
-import { Assign, Declare, Expression, Program, Statement, ZerowAstType } from './generated/ast.js';
+import { Assign, Declare, Expression, Program, Statement, Unit, ZerowAstType } from './generated/ast.js';
 import type { ZerowServices } from './zerow-module.js';
 
 /**
@@ -19,7 +19,6 @@ export function registerValidationChecks(services: ZerowServices) {
  */
 export class ZerowValidator {
 
-    // TODO: Add logic here for validation checks of properties
     checkProgram(model: Program, accept: ValidationAcceptor): void {
         this.validateProgram(model, accept);
     }
@@ -27,6 +26,16 @@ export class ZerowValidator {
     validateProgram(model: Program, accept: ValidationAcceptor) {
 
         const declaredName = new Set<string>();
+        const declaredUnit = new Set<string>();
+
+        const firstNonUnitOffset = Math.min(
+            ...model.statements.map(s => s.$cstNode?.offset ?? Infinity),
+            ...model.returns.map(r => r.$cstNode?.offset ?? Infinity)
+        );
+
+        for (const unit of model.units) {
+            buildMeasureSet(unit);
+        }
 
         for (const statement of model.statements) {
             validateStatement(statement);
@@ -53,10 +62,28 @@ export class ZerowValidator {
             return undefined;
         }
 
-        //     function buildMeasureSet(/* TODO: add type */) {
-        //         /* TODO: Add validation code */
-        //     }
+        // check that units are declared first and no duplicate units exist
+        function buildMeasureSet(statement: Unit) {
+            /* grammer is (units+=Unit)* (statements+=Statement)* (returns+=Return)* 
+            so this error message never shows insted you get: 
+            Expecting token of type 'EOF' but found `unit`. */
+            if ((statement.$cstNode?.offset ?? Infinity) > firstNonUnitOffset) {
+                accept('error', 'Unit must be decaled at the start of the program', {
+                    node: statement,
+                    property: 'name'
+                });
+            }
+            if (declaredUnit.has(statement.name)) {
+                accept('error', `Unit ${statement.name} has already been declared`, {
+                    node: statement,
+                    property: 'name'
+                });
+            } else {
+                declaredUnit.add(statement.name);
+            }
+        }
 
+        //validate that the statement is valid
         function validateStatement(statement: Statement) {
             if (statement.$type === 'Declare') {
                 validateDeclarationStmt(statement);
@@ -81,6 +108,7 @@ export class ZerowValidator {
         }
 
         //check that a variable is declared before it is assigned
+        // TODO: if you assigne 10[kg] to x (declare x 5[m]) then x new unit should be [kg] I thing if I understood it right
         function validateAssignmentStmt(assignment: Assign) {
             const targetName = assignment.target.ref?.name;
             if (targetName && !declaredName.has(targetName)) {
@@ -92,6 +120,7 @@ export class ZerowValidator {
             validateExpression(assignment.value);
         }
 
+        //check that the units are compatible
         function validateExpression(expr: Expression) {
             if (expr.$type === 'BinaryExpression') {
                 const leftUnit = inferUnit(expr.left);
