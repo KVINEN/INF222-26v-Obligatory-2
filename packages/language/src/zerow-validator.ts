@@ -1,5 +1,5 @@
 import type { ValidationAcceptor, ValidationChecks } from 'langium';
-import { Declare, Expression, Program, Statement, ZerowAstType } from './generated/ast.js';
+import { Assign, Declare, Expression, Program, Statement, ZerowAstType } from './generated/ast.js';
 import type { ZerowServices } from './zerow-module.js';
 
 /**
@@ -27,8 +27,12 @@ export class ZerowValidator {
     validateProgram(model: Program, accept: ValidationAcceptor) {
 
         const declaredName = new Set<string>();
+
         for (const statement of model.statements) {
             validateStatement(statement);
+        }
+        for (const ret of model.returns) {
+            validateExpression(ret.value);
         }
 
         function inferUnit(expr: Expression | undefined): string | undefined {
@@ -57,7 +61,7 @@ export class ZerowValidator {
             if (statement.$type === 'Declare') {
                 validateDeclarationStmt(statement);
             } else if (statement.$type === 'Assign') {
-                /*validateAssignmentStmt(statement);*/
+                validateAssignmentStmt(statement);
             } else if (statement.$type === 'ExpressionStatment') {
                 validateExpression(statement.expr);
             }
@@ -73,11 +77,20 @@ export class ZerowValidator {
             } else {
                 declaredName.add(declareation.name);
             }
+            validateExpression(declareation.value);
         }
 
-        //     function validateAssignmentStmt(/* TODO: add type */) {
-        //         /* TODO: Add validation code */
-        //     }
+        //check that a variable is declared before it is assigned
+        function validateAssignmentStmt(assignment: Assign) {
+            const targetName = assignment.target.ref?.name;
+            if (targetName && !declaredName.has(targetName)) {
+                accept('error', `Variable ${targetName} is assigned before its declaration`, {
+                    node: assignment,
+                    property: 'target'
+                });
+            }
+            validateExpression(assignment.value);
+        }
 
         function validateExpression(expr: Expression) {
             if (expr.$type === 'BinaryExpression') {
@@ -96,14 +109,10 @@ export class ZerowValidator {
 
                 validateExpression(expr.left);
                 validateExpression(expr.right);
-            } else if (expr.$type === 'GroupExpression') {
-                validateExpression(expr.expr);
-            } else if (expr.$type === 'NegativeNum') {
-                validateExpression(expr.value);
             }
         }
 
-        //     function validateLiteral(/* TODO: add type */) {
+        //     function validateLiteral(/* TODO: add type *returns/) {
         //         /* TODO: Add validation code */
         //     }
 
