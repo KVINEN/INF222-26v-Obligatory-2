@@ -67,7 +67,7 @@ export class ZerowValidator {
             /* grammer is (units+=Unit)* (statements+=Statement)* (returns+=Return)* 
             so this error message never shows insted you get: 
             Expecting token of type 'EOF' but found `unit`. */
-            if ((statement.$cstNode?.offset ?? Infinity) > firstNonUnitOffset) {
+            if ((statement.$cstNode?.offset ?? -1) > firstNonUnitOffset) {
                 accept('error', 'Unit must be decaled at the start of the program', {
                     node: statement,
                     property: 'name'
