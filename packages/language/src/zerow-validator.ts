@@ -64,11 +64,8 @@ export class ZerowValidator {
 
         // check that units are declared first and no duplicate units exist
         function buildMeasureSet(statement: Unit) {
-            /* grammer is (units+=Unit)* (statements+=Statement)* (returns+=Return)* 
-            so this error message never shows insted you get: 
-            Expecting token of type 'EOF' but found `unit`. */
             if ((statement.$cstNode?.offset ?? -1) > firstNonUnitOffset) {
-                accept('error', 'Unit must be decaled at the start of the program', {
+                accept('error', 'Unit must be declared at the start of the program', {
                     node: statement,
                     property: 'name'
                 });

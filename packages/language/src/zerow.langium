@@ -2,9 +2,7 @@ grammar Zerow
 
 //entry point of the program
 entry Program:
-    (units+=Unit)*
-    (statements+=Statement)*
-    (returns+=Return)*;
+    (units+=Unit | statements+=Statement | returns+=Return)*;
 
 //statement can be any of the three types
 Statement:
