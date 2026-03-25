@@ -27,6 +27,7 @@ export class ZerowValidator {
 
         const declaredName = new Set<string>();
         const declaredUnit = new Set<string>();
+        const currentUnit = new Map<string, string>();
 
         const firstNonUnitOffset = Math.min(
             ...model.statements.map(s => s.$cstNode?.offset ?? Infinity),
@@ -50,7 +51,8 @@ export class ZerowValidator {
             if (expr.$type === 'IntLiteral') {
                 return expr.unit.ref?.name;
             } else if (expr.$type === 'VariableRef') {
-                return inferUnit(expr.var.ref?.value);
+                const varName = expr.var.ref?.name;
+                return varName ? currentUnit.get(varName) : undefined;
             } else if (expr.$type === 'GroupExpression') {
                 return inferUnit(expr.expr);
             } else if (expr.$type === 'NegativeNum') {
@@ -102,19 +104,30 @@ export class ZerowValidator {
                 declaredName.add(declareation.name);
             }
             validateExpression(declareation.value);
+
+            const unit = inferUnit(declareation.value);
+            if (unit) {
+                currentUnit.set(declareation.name, unit);
+            }
         }
 
         //check that a variable is declared before it is assigned
-        // TODO: if you assigne 10[kg] to x (declare x 5[m]) then x new unit should be [kg] I thing if I understood it right
         function validateAssignmentStmt(assignment: Assign) {
             const targetName = assignment.target.ref?.name;
-            if (targetName && !declaredName.has(targetName)) {
+            if (assignment.target.ref && targetName && !declaredName.has(targetName)) {
                 accept('error', `Variable ${targetName} is assigned before its declaration`, {
                     node: assignment,
                     property: 'target'
                 });
             }
             validateExpression(assignment.value);
+
+            if (targetName && declaredName.has(targetName)) {
+                const unit = inferUnit(assignment.value);
+                if (unit) {
+                    currentUnit.set(targetName, unit);
+                }
+            }
         }
 
         //check that the units are compatible
@@ -127,28 +140,26 @@ export class ZerowValidator {
                 if ((validOperators.includes(expr.operator)) && leftUnit && rightUnit) {
                     if (leftUnit !== rightUnit) {
                         accept('error', `Unit mismatch: ${leftUnit} and ${rightUnit}`, {
-                            node: expr,
-                            property: 'operator'
+                            node: expr
                         });
                     }
                 }
 
                 validateExpression(expr.left);
                 validateExpression(expr.right);
+            } else if (expr.$type === 'VariableRef') {
+                const varName = expr.var.ref?.name;
+                if (expr.var.ref && varName && !declaredName.has(varName)) {
+                    accept('error', `Variable ${varName} is referenced before its declaration`, {
+                        node: expr,
+                        property: 'var'
+                    });
+                }
+            } else if (expr.$type === 'GroupExpression') {
+                validateExpression(expr.expr);
+            } else if (expr.$type === 'NegativeNum') {
+                validateExpression(expr.value);
             }
         }
-
-        //     function validateLiteral(/* TODO: add type *returns/) {
-        //         /* TODO: Add validation code */
-        //     }
-
-        //     function validateReference(/* TODO: add type */) {
-        //         /* TODO: Add validation code */
-        //     }
-
-        //     function resolveReference(/* TODO: add type */) {
-        //         /* TODO: Add validation code */
-        //     }
-
     }
 }
