@@ -176,7 +176,7 @@ export function i32(v: number): number[] {
  */
 export function section(id: number, contents: any[]) {
     const sizeInBytes = contents.flat(Infinity).length;
-    return [/* TODO */];
+    return [id, u32(sizeInBytes), contents];
 }
 
 /**
@@ -203,10 +203,10 @@ export function vec(elements: string | any[]) {
  *
  * These numeric identifiers specify which section is being encoded.
  */
-const SECTION_ID_TYPE = /* TODO */;
-const SECTION_ID_FUNCTION = /* TODO */;
-const SECTION_ID_EXPORT = /* TODO */;
-const SECTION_ID_CODE = /* TODO */;
+const SECTION_ID_TYPE = 0x01;
+const SECTION_ID_FUNCTION = 0x03;
+const SECTION_ID_EXPORT = 0x07;
+const SECTION_ID_CODE = 0x0a;
 
 /**
  * Encode a function type entry.
@@ -226,7 +226,7 @@ const SECTION_ID_CODE = /* TODO */;
  * 3. Encode the result types using vec().
  */
 export function functype(paramTypes: string | any[], resultTypes: string | any[]) {
-    return [0x60, /* TODO */];
+    return [0x60, vec(paramTypes), vec(resultTypes)];
 }
 
 /**
@@ -413,7 +413,7 @@ export const exportdesc = {
  * 3. Append all provided sections.
  */
 export function module(sections: any[]) {
-    return [magic(), /* TODO */];
+    return [magic(), version(), ...sections];
 }
 
 /**
@@ -424,9 +424,9 @@ export function module(sections: any[]) {
  */
 
 export const instr = {
-    end: /* TODO */,
-    i32: { const: /* TODO */, add: /* TODO */, sub: /* TODO */, mul: /* TODO */, div_s: /* TODO */ },
-    local: { get: /* TODO */, set: /* TODO */},
+    end: 0x0b,
+    i32: { const: 0x41, add: 0x6a, sub: 0x6b, mul: 0x6c, div_s: 0x6d },
+    local: { get: 0x20, set: 0x21 },
 };
 
 /**
@@ -434,7 +434,7 @@ export const instr = {
  * and local declarations.
  */
 export const valtype = {
-    i32: /* TODO */
+    i32: 0x7f
 };
 
 /**
