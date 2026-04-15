@@ -35,14 +35,12 @@ function generateProgram(model: Program) {
     for (const state of model.statements) {
         visitState(state);
     }
-    
+
     for (const ret of model.returns) {
         visitReturn(ret);
     }
 
     instructions.push(instr.end);
-
-    // Functions:
 
     function visitState(state: Statement) {
         if (state.$type === "Declare") {
@@ -111,8 +109,6 @@ function generateProgram(model: Program) {
         visitExpr(ret.value);
         returns.push(ret);
     }
-
-    // Sections: 
 
     const returnTypes = returns.map(() => valtype.i32);
     const mainSig = functype([], returnTypes);
