@@ -20,7 +20,7 @@ export const generateAction = async (source: string, destination: string): Promi
     console.log(chalk.green(`Code generated succesfully: ${generatedFilePath}`));
 };
 
-export default function(): void {
+export default function (): void {
     const program = new Command();
 
     program.version(JSON.parse(packageContent).version);
@@ -33,6 +33,12 @@ export default function(): void {
         .argument('<destination>', 'destination file')
         .description('Generates code for a provided source file.')
         .action(generateAction);
+
+    program
+        .command('run')
+        .argument('<file>', `source file (possible file extensions: ${fileExtensions})`)
+        .description('Attempt to compile and run the given program')
+        .action(compileAndRun);
 
     program.parse(process.argv);
 }
